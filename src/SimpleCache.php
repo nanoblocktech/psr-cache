@@ -187,7 +187,7 @@ class SimpleCache implements CacheInterface
         if($expiration === null){
             $expiration = 24 * 60 * 60;
         }else if($expiration instanceof DateInterval){
-            $expiration = Helper::intervalToSeconds($expiration);
+            $expiration = FileCache::ttlToSeconds($expiration);
         }
 
         return $this->engine->setItem($key, $$content, $expiration, null, true);
