@@ -18,7 +18,7 @@ use \Luminova\Time\Time;
 use \DateTimeInterface;
 use \DateInterval;
 
-class FileCache implements CacheItemPoolInterface
+class CachePool implements CacheItemPoolInterface
 {
     /**
      * Engin instance
