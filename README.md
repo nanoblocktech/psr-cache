@@ -1,6 +1,7 @@
 # PSR CACHE
 
-PSR Cache for Luminova framework 
+PSR Cache for Luminova framework `CachePool`, `SimpleCache`.
+
 
 ### Installation 
 
