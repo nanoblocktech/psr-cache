@@ -10,37 +10,39 @@
 namespace Luminova\Psr\Cache;
 
 use \Psr\Cache\CacheItemPoolInterface;
-use \Luminova\Cache\FileCache as SystemFileCache;
+use \Luminova\Cache\FileCache;
 use \Luminova\Psr\Cache\CacheItem;
-use \Luminova\Psr\Cache\Exceptions\InvalidArgumentException;
 use \Psr\Cache\CacheItemInterface;
-use \Luminova\Time\Time;
-use \DateTimeInterface;
-use \DateInterval;
+use \Luminova\Psr\Cache\Helper\Helper;
 
 class CachePool implements CacheItemPoolInterface
 {
     /**
      * Engin instance
      * 
-     * @var SystemFileCache|null $engine
-     */
-    public ?SystemFileCache $engine = null;
+     * @var FileCache|null $engine
+    */
+    public ?FileCache $engine = null;
 
     /**
-     * @var array Deferred cache items
-     */
+     * @var array<string, mixed> $deferred Deferred cache items
+    */
     private array $deferred = [];
+
+    /**
+     * @var array $passed Deferred passed transactions cache keys
+    */
+    private array $passed = [];
 
     /**
      * FileCache constructor.
      * 
      * @param string $storage The storage location and configuration.
      * @param string $folder subfolder path
-     */
+    */
     public function __construct(string $storage = 'psr_cache_storage', string $folder = 'psr')
     {
-        $this->engine = new SystemFileCache($storage, $folder);
+        $this->engine = new FileCache($storage, $folder);
         $this->engine->create();
     }
 
@@ -52,19 +54,17 @@ class CachePool implements CacheItemPoolInterface
      * @return CacheItem The cache item.
      * 
      * @throws InvalidArgumentException If the key is not a legal value.
-     */
+    */
     public function getItem(string $key): CacheItem
     {
-        if ($key === '') {
-            throw new InvalidArgumentException('Cache key must be a valid string');
-        }
+        Helper::isKeyLegal($key);
 
         $data = $this->engine->getItem($key, false);
         $content = $data['data'] ?? null;
         $isHit = $data === null ? false : !$this->engine->hasExpired($key);
 
         $item = new CacheItem($key, $content, $isHit);
-        $item->expiresAt(static::secondsToDateTime($data['expiration'] ?? 0));
+        $item->expiresAt(Helper::secondsToDateTime($data['expiration'] ?? 0));
         $item->expiresAfter($data['expireAfter'] ?? null);
 
         return $item;
@@ -77,14 +77,13 @@ class CachePool implements CacheItemPoolInterface
      * 
      * @return iterable An array of items keyed by the cache keys.
      * @throws InvalidArgumentException
-     */
+    */
     public function getItems(array $keys = []): iterable
     {
         $items = [];
         foreach ($keys as $key) {
-            if ($key === '') {
-                throw new InvalidArgumentException('Cache key must be a valid string');
-            }
+            Helper::isKeyLegal($key);
+
             $items[$key] = $this->getItem($key);
         }
 
@@ -98,12 +97,11 @@ class CachePool implements CacheItemPoolInterface
      * 
      * @return bool True if item exists, false otherwise.
      * @throws InvalidArgumentException
-     */
+    */
     public function hasItem(string $key): bool
     {
-        if ($key === '') {
-            throw new InvalidArgumentException('Cache key must be a valid string');
-        }
+        Helper::isKeyLegal($key);
+
         return $this->engine->hasItem($key);
     }
 
@@ -111,11 +109,10 @@ class CachePool implements CacheItemPoolInterface
      * Clears the entire cache.
      * 
      * @return bool True on success, false on failure.
-     */
+    */
     public function clear(): bool
     {
-        $this->engine->clear();
-        return true;
+        return $this->engine->clear();
     }
 
     /**
@@ -125,12 +122,10 @@ class CachePool implements CacheItemPoolInterface
      * 
      * @return bool True if item was deleted, false otherwise.
      * @throws InvalidArgumentException
-     */
+    */
     public function deleteItem(string $key): bool
     {
-        if ($key === '') {
-            throw new InvalidArgumentException('Cache key must be a valid string');
-        }
+        Helper::isKeyLegal($key);
 
         return $this->engine->deleteItem($key);
     }
@@ -142,12 +137,11 @@ class CachePool implements CacheItemPoolInterface
      * 
      * @return bool True if items were deleted, false otherwise.
      * @throws InvalidArgumentException
-     */
+    */
     public function deleteItems(array $keys): bool
     {
-        if ($keys === []) {
-            throw new InvalidArgumentException('Cache key must be a valid string');
-        }
+        Helper::areKeysLegal($keys);
+
         return $this->engine->deleteItems($keys);
     }
 
@@ -157,7 +151,7 @@ class CachePool implements CacheItemPoolInterface
      * @param CacheItemInterface $item The cache item to save.
      * 
      * @return bool True if saved successfully, false otherwise.
-     */
+    */
     public function save(CacheItemInterface $item): bool
     {
         $key = $item->getKey();
@@ -171,12 +165,18 @@ class CachePool implements CacheItemPoolInterface
      * 
      * @param CacheItemInterface $item The cache item to save.
      * 
-     * @return bool Always returns true.
-     */
+     * @return bool False if the item could not be queued or if a commit was attempted and failed. True otherwise.
+    */
     public function saveDeferred(CacheItemInterface $item): bool
     {
         $key = $item->getKey();
-        $this->deferred[$key] = $item;
+        if(isset($this->deferred[$key]) || $item->get() === null || $this->engine->hasExpired($key)){
+
+            return false;
+
+        }
+
+        $this->deferred[$key] = clone $item;
 
         return true;
     }
@@ -184,63 +184,54 @@ class CachePool implements CacheItemPoolInterface
     /**
      * Commits any deferred cache items.
      * 
-     * @return bool True if any deferred items were saved, false otherwise.
-     */
+     * @return bool True if all not-yet-saved items were successfully saved or there were none. False otherwise.
+    */
     public function commit(): bool
     {
-        $count = 0;
+        if ($this->deferred === []) {
+            return true;
+        }
+
+        $this->passed = [];
+        $failed = [];
+
         foreach ($this->deferred as $key => $item) {
-            $isHit = $item->get() !== null && !$this->engine->hasExpired($key);
-            if ($isHit) {
-                $this->saveItem($item, true);
-                $count++;
+            if ($this->saveItem($item, true)) {
+                $this->passed[] = $key;
+            }else{
+                $failed[$key] = $item;
             }
         }
 
-        $this->deferred = [];
+        if($failed === []){
+            $this->passed = [];
 
-        return $count !== 0;
+            return true;
+        }
+        
+        $this->deferred = $failed;
+        
+        return false;
     }
 
     /**
-     * Convert DateInterval to seconds.
+     * Rollback deferred transaction if any was failed 
      * 
-     * @param DateInterval $interval The DateInterval object.
-     * 
-     * @return int The number of seconds.
-     */
-    private function intervalToSeconds(DateInterval $interval): int
+     * @return bool if rollback was successful 
+    */
+    public function rollback(): bool
     {
-        $reference = new Time();
-        $endTime = $reference->add($interval);
+        if ($this->passed === []) {
+            return true;
+        }
 
-        return $endTime->getTimestamp() - $reference->getTimestamp();
-    }
+        if($this->deleteItems( $this->passed )){
+            $this->passed = [];
 
-     /**
-     * Convert seconds to a DateInterval object.
-     *
-     * @param int $seconds The number of seconds.
-     * @return DateInterval The DateInterval object representing the duration in seconds.
-     */
-    private static function secondsToDateInterval(int $seconds): DateInterval
-    {
-        $intervalString = "PT{$seconds}S";
-        return DateInterval::createFromDateString($intervalString);
-    }
+            return true;
+        }
 
-    /**
-     * Convert Seconds to DateTimeInterface.
-     * 
-     * @param int $seconds seconds
-     * 
-     * @return DateTimeInterface $dateTime
-     */
-    private static function secondsToDateTime(int $seconds): DateTimeInterface
-    {
-        $dateTime = (new Time())->modify('+' . $seconds . ' seconds');
-
-        return $dateTime;
+        return false;
     }
 
     /**
@@ -250,7 +241,7 @@ class CachePool implements CacheItemPoolInterface
      * @param bool $expired Whether the item is expired.
      * 
      * @return bool True if item was saved, false otherwise.
-     */
+    */
     private function saveItem(CacheItemInterface $item, bool $expired = true): bool
     {
         if ($expired){

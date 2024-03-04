@@ -18,20 +18,20 @@ class CacheItem implements CacheItemInterface
     /**
      * @var string $key cache key
     */
-    private string $key;
+    private string $key = '';
 
     /**
      * @var mixed $content cache content
     */
-    private mixed $content;
+    private mixed $content = null;
 
     /**
      * @var bool $isHit cache hit
     */
-    private bool $isHit;
+    private bool $isHit = false;
 
     /**
-     * @var  ?DateTimeInterface $expiration cache expiration
+     * @var ?DateTimeInterface $expiration cache expiration
     */
     public ?DateTimeInterface $expiration = null;
 
@@ -46,7 +46,7 @@ class CacheItem implements CacheItemInterface
      * @param string $key The cache item key.
      * @param mixed $value The cache item value.
      * @param bool $isHit Indicates if the cache item was a hit.
-     */
+    */
     public function __construct(string $key, mixed $content = null, ?bool $isHit = null)
     {
         $this->key = $key;
@@ -58,7 +58,7 @@ class CacheItem implements CacheItemInterface
      * Retrieves the key of the cache item.
      *
      * @return string The cache item key.
-     */
+    */
     public function getKey(): string
     {
         return $this->key;
@@ -68,7 +68,7 @@ class CacheItem implements CacheItemInterface
      * Retrieves the value of the cache item.
      *
      * @return mixed|null The value of the cache item, or null if not found.
-     */
+    */
     public function get(): mixed
     {
         return $this->isHit ? $this->content : null;
@@ -78,7 +78,7 @@ class CacheItem implements CacheItemInterface
      * Checks if the cache item is a hit.
      *
      * @return bool True if the cache item is a hit, otherwise false.
-     */
+    */
     public function isHit(): bool
     {
         return $this->isHit;
@@ -89,7 +89,7 @@ class CacheItem implements CacheItemInterface
      *
      * @param mixed $value The value to set.
      * @return static The current instance.
-     */
+    */
     public function set(mixed $value): static
     {
         $this->content = $value;
@@ -103,20 +103,21 @@ class CacheItem implements CacheItemInterface
      *
      * @param DateTimeInterface|null $expiration The expiration time of the cache item.
      * @return static The current instance.
-     */
+    */
     public function expiresAt(?DateTimeInterface $expiration): static
     {
         $this->expiration = $expiration;
         $this->expireAfter = null;
+        
         return $this;
     }
 
-     /**
+    /**
      * Sets the expiration time of the cache item relative to the current time.
      *
      * @param int|DateInterval|null $time The expiration time in seconds or as a DateInterval.
      * @return static The current instance.
-     */
+    */
     public function expiresAfter(int|DateInterval|null $time): static
     {
         $this->expireAfter = $time;
