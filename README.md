@@ -58,6 +58,9 @@ $pool->saveDeferred($item);
 // Commit Item Deferred
 $pool->commit();
 
+// Rollback If any deferred commit failed to save, if you prefer not to recommit
+$pool->rollback();
+
 // Clear a specific cache item
 $pool->deleteItem('cache_key');
 
@@ -66,5 +69,46 @@ $pool->deleteItems(['key1', 'key2']);
 
 // Clear all cache items
 $pool->clear();
+```
 
+```php
+use \Luminova\Psr\Cache\SimpleCache;
+
+$simple = new SimpleCache('my_cache', 'my_cache_folder_name');
+
+// Set a cache item
+$data = $simple->get('cache_key', 'NO_DATA');
+if($item === 'NO_DATA'){
+    $data = 'This is my cache data';
+    $simple->set('cache_key', $data);
+}
+```
+
+### SimpleCache Methods 
+
+
+```php
+// Get Item
+$simple->get('cache_key', 'default value');
+
+// Get Items
+$simple->getMultiple(['key1', 'key2'], 'default on empty key value');
+
+// Has Item
+$simple->has('cache_key');
+
+// Save Item
+$simple->set('cache_key', 'data to save', 60)
+
+// Save Multiple items 
+$simple->setMultiple(['key1' => 'data 1', 'key2' => 'data 2'], 60);
+
+// Clear a specific cache item
+$simple->delete('cache_key');
+
+// Clear multiple cache items
+$simple->deleteMultiple(['key1', 'key2']);
+
+// Clear all cache items
+$simple->clear();
 ```
