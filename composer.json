@@ -1,0 +1,42 @@
+{
+    "name": "nanoblocktech/psr-cache",
+    "type": "library",
+    "description": "PSR cache for Luminova framework.",
+    "license": "MIT",
+    "keywords": ["PHP", "Luminova", "PSR Cache", "Cache", "File Cache"],
+    "authors": [
+        {
+            "name": "Ujah Chigozie",
+            "email": "ujahchigozie@gmail.com"
+        },
+       {
+            "name": "Nanoblock Technology",
+            "email": "code@nanoblocktech.com"
+        }
+    ],
+    
+    "support": {
+        "issues": "https://github.com/nanoblocktech/psr-cache/issues",
+        "source": "https://github.com/nanoblocktech/psr-cache"
+    },
+    
+    "require": {
+       "php": "^8.0",
+       "psr/cache": "^3.0",
+       "psr/simple-cache": "^3.0"
+    },
+
+    "autoload": {
+        "psr-4": { 
+           "Luminova\\Psr\\Cache\\": "src/" 
+        }
+    },
+
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+  
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
