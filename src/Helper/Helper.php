@@ -12,39 +12,9 @@ namespace Luminova\Psr\Cache\Helper;
 use \Luminova\Psr\Cache\Exceptions\InvalidArgumentException;
 use \Luminova\Time\Time;
 use \DateTimeInterface;
-use \DateInterval;
 
 class Helper 
 {
-
-     /**
-     * Convert DateInterval to seconds.
-     * 
-     * @param DateInterval $interval The DateInterval object.
-     * 
-     * @return int The number of seconds.
-     */
-    public static function intervalToSeconds(DateInterval $interval): int
-    {
-        $reference = new Time();
-        $endTime = $reference->add($interval);
-
-        return $endTime->getTimestamp() - $reference->getTimestamp();
-    }
-
-
-    /**
-     * Convert seconds to a DateInterval object.
-     *
-     * @param int $seconds The number of seconds.
-     * @return DateInterval The DateInterval object representing the duration in seconds.
-     */
-    public static function secondsToDateInterval(int $seconds): DateInterval
-    {
-        $intervalString = "PT{$seconds}S";
-        return DateInterval::createFromDateString($intervalString);
-    }
-
     /**
      * Convert Seconds to DateTimeInterface.
      * 
@@ -65,7 +35,7 @@ class Helper
      * @param iterable $keys 
      * 
      * @return void 
-     * @throw InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function areKeysLegal(iterable $keys): void
     {
@@ -80,7 +50,7 @@ class Helper
      * @param bool $key key to check
      * 
      * @return void 
-     * @throw InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function isKeyLegal(string $key): void
     {
