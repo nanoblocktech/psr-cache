@@ -3,7 +3,7 @@
     "type": "library",
     "description": "PSR cache for Luminova framework.",
     "license": "MIT",
-    "keywords": ["PHP", "Luminova", "PSR Cache", "Cache", "File Cache", "Simple Cache"],
+    "keywords": ["PHP", "PSR", "PSR-6", "Framework", "PHP Luminova", "PSR Cache", "Cache", "File Cache", "Simple Cache"],
     "authors": [
         {
             "name": "Ujah Chigozie",
