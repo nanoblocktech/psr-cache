@@ -154,6 +154,10 @@ class CachePool implements CacheItemPoolInterface
     */
     public function save(CacheItemInterface $item): bool
     {
+        if(!$item instanceof CacheItem){
+            return false;
+        }
+
         $key = $item->getKey();
         $expired = $item->get() === null || $this->engine->hasExpired($key);
 
@@ -169,6 +173,10 @@ class CachePool implements CacheItemPoolInterface
     */
     public function saveDeferred(CacheItemInterface $item): bool
     {
+        if(!$item instanceof CacheItem){
+            return false;
+        }
+
         $key = $item->getKey();
         if(isset($this->deferred[$key]) || $item->get() === null || $this->engine->hasExpired($key)){
 
