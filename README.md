@@ -37,7 +37,7 @@ if (!$item->isHit()) {
 }
 ```
 
-### Methods 
+### CachePool Methods 
 
 ```php
 // Get Item
