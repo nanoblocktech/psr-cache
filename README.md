@@ -41,6 +41,11 @@ if (!$item->isHit()) {
 
 ### CachePool Methods 
 
+Initialize the class  with `storage` location name and `folder` subfolder name.
+```php 
+$pool = new CachePool(string $storage = 'psr_cache_storage', string $folder = 'psr');
+```
+
 ```php
 // Retrieves an item from the cache.
 $pool->getItem('cache_key'): CacheItem;
@@ -76,7 +81,7 @@ $pool->clear(): bool;
 ```php
 use \Luminova\Psr\Cache\SimpleCache;
 
-$simple = new SimpleCache('my_cache', 'my_cache_folder_name');
+$simple = new SimpleCache(string 'my_cache', string 'my_cache_folder_name');
 
 // Set a cache item
 $data = $simple->get('cache_key', 'NO_DATA');
@@ -127,7 +132,6 @@ Initialize the class with `key`, `content` to save and specify the `hit` state o
 ```php
 $item = new CacheItem(string $key, mixed $content = null, ?bool $isHit = null);
 ```
-Method 
 
 ```php
 //Retrieves the key of the cache item.
