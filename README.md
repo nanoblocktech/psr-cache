@@ -96,7 +96,7 @@ if($item === 'NO_DATA'){
 Initialize the class  with `storage` location name and `folder` subfolder name.
 
 ```php
-$item = new ‎SimpleCache‎(string $storage = 'psr_cache_storage', string $folder = 'psr');
+$simple = new ‎SimpleCache‎(string $storage = 'psr_cache_storage', string $folder = 'psr');
 ```
 
 ```php
