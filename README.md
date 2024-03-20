@@ -42,35 +42,35 @@ if (!$item->isHit()) {
 ### CachePool Methods 
 
 ```php
-// Get Item
-$pool->getItem('cache_key');
+// Retrieves an item from the cache.
+$pool->getItem('cache_key'): CacheItem;
 
-// Get Items
-$pool->getItems(['key1', 'key2']);
+// Retrieves multiple cache items at once.
+$pool->getItems(array ['key1', 'key2']): iterable<key, CacheItem>;
 
-// Has Item
-$pool->hasItem('cache_key');
+// Determines whether an item exists in the cache.
+$pool->hasItem(string 'cache_key'): bool;
 
-// Save Item
-$pool->save($item);
+// Persists a cache item immediately.
+$pool->save(CacheItemInterface $item): bool;
 
-// Save Item Deferred
-$pool->saveDeferred($item);
+// Save a deferred cache item.
+$pool->saveDeferred(CacheItemInterface $item): bool;
 
-// Commit Item Deferred
-$pool->commit();
+// Commits any deferred cache items.
+$pool->commit(): bool;
 
 // Rollback If any deferred commit failed to save, if you prefer not to recommit
-$pool->rollback();
+$pool->rollback(): bool;
 
-// Clear a specific cache item
-$pool->deleteItem('cache_key');
+// Deletes an item from the cache.
+$pool->deleteItem(string 'cache_key'): bool;
 
-// Clear multiple cache items
-$pool->deleteItems(['key1', 'key2']);
+// Deletes multiple items from the cache.
+$pool->deleteItems(array ['key1', 'key2']): bool;
 
-// Clear all cache items
-$pool->clear();
+// Clear all cached entries 
+$pool->clear(): bool;
 ```
 
 ```php
@@ -88,29 +88,63 @@ if($item === 'NO_DATA'){
 
 ### SimpleCache Methods 
 
+Initialize the class  with `storage` location name and `folder` subfolder name.
 
 ```php
-// Get Item
-$simple->get('cache_key', 'default value');
+$item = new ‎SimpleCache‎(string $storage = 'psr_cache_storage', string $folder = 'psr');
+```
 
-// Get Items
-$simple->getMultiple(['key1', 'key2'], 'default on empty key value');
+```php
+// Retrieves an item from the cache.
+$simple->get(string 'cache_key', mixed 'default value'): mixed;
 
-// Has Item
-$simple->has('cache_key');
+// Retrieves multiple cache items at once.
+$simple->getMultiple(array ['key1', 'key2'], 'default on empty key value'): iterable<key, mixed>;
 
-// Save Item
-$simple->set('cache_key', 'data to save', 60)
+// Determines whether an item exists in the cache.
+$simple->has(string 'cache_key'): bool;
 
-// Save Multiple items 
-$simple->setMultiple(['key1' => 'data 1', 'key2' => 'data 2'], 60);
+// Persists a cache item immediately with an optional TTL.
+$simple->set(string 'cache_key', mixed 'data to save', null|int|DateInterval 60): bool;
 
-// Clear a specific cache item
-$simple->delete('cache_key');
+// Persists a set of key => value pairs in the cache, with an optional TTL.
+$simple->setMultiple(array ['key1' => 'data 1', 'key2' => 'data 2'], null|int|DateInterval 60): bool;
 
-// Clear multiple cache items
-$simple->deleteMultiple(['key1', 'key2']);
+// Deletes an item from the cache.
+$simple->delete(string 'cache_key'): bool;
 
-// Clear all cache items
-$simple->clear();
+// Deletes multiple items from the cache.
+$simple->deleteMultiple(array ['key1', 'key2']): bool;
+
+// Clears all cache entries.
+$simple->clear(): bool;
+```
+
+### CacheItem Methods 
+
+Initialize the class with `key`, `content` to save and specify the `hit` state optionally.
+
+```php
+$item = new CacheItem(string $key, mixed $content = null, ?bool $isHit = null);
+```
+Method 
+
+```php
+//Retrieves the key of the cache item.
+$item->getKey(): string;
+
+//Retrieves the value of the cache item.
+$item->get(): mixed;
+
+//Check if the cache item is a hit.
+$item->isHit(): bool;
+
+//Sets the value of the cache item.
+$item->set(mixed $value): static;
+
+//Sets the expiration time of the cache item.
+$item->expiresAt(?DateTimeInterface $expiration): static;
+
+//Sets the expiration time of the cache item relative to the current time.
+$item->expiresAfter(int|DateInterval|null $time): static;
 ```
