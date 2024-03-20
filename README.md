@@ -1,6 +1,7 @@
 # PSR CACHE
 
-PSR Cache for Luminova framework `CachePool`, `SimpleCache`.
+PSR Cache for [Luminova Framework](https://github.com/luminovang/luminova/) `CachePool`, `SimpleCache`.
+To use this library you need to install Luminova Framework first.
 
 
 ### Installation 
