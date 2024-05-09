@@ -24,9 +24,7 @@ class Helper
      */
     public static function secondsToDateTime(int $seconds): DateTimeInterface
     {
-        $dateTime = (new Time())->modify('+' . $seconds . ' seconds');
-
-        return $dateTime;
+        return (new Time())->modify('+' . $seconds . ' seconds');
     }
 
      /**
@@ -37,22 +35,22 @@ class Helper
      * @return void 
      * @throws InvalidArgumentException
      */
-    public static function areKeysLegal(iterable $keys): void
+    public static function assertLegalKeys(iterable $keys): void
     {
         foreach($keys as $key){
-            static::isKeyLegal($key);
+            static::assertLegalKey($key);
         }
     }
 
     /**
-     * Check if key is valid 
+     * Check if the key is valid 
      * 
      * @param bool $key key to check
      * 
      * @return void 
      * @throws InvalidArgumentException
      */
-    public static function isKeyLegal(string $key): void
+    public static function assertLegalKey(string $key): void
     {
         if($key === null || $key === ''){
             throw new InvalidArgumentException('Cache key must be a valid string');
