@@ -11,6 +11,7 @@ namespace Luminova\Psr\Cache;
 
 use \Psr\SimpleCache\CacheInterface;
 use \Luminova\Cache\FileCache;
+use \Luminova\Time\Timestamp;
 use \DateInterval;
 use \Luminova\Psr\Cache\Helper\Helper;
 
@@ -36,73 +37,49 @@ class SimpleCache implements CacheInterface
     }
 
     /**
-     * Retrieves an item from the cache.
-     * 
-     * @param string $key The key for the item to retrieve.
-     * @param mixed $default Default value 
-     * 
-     * @return mixed The cache item.
-     * 
-     * @throws InvalidArgumentException If the key is not a legal value.
+     * {@inheritdoc}
     */
     public function get(string $key, mixed $default = null): mixed
     {
-        Helper::isKeyLegal($key);
+        Helper::assertLegalKey($key);
 
         $content = $this->engine->getItem($key);
 
         return $content ?? $default;
     }
 
-    /**
-     * Persists a cache item immediately.
-     * 
-     * @param string $key Cache key
-     * @param string $value The cache value to save.
-     * 
-     * @return bool True if saved successfully, false otherwise.
+   /**
+     * {@inheritdoc}
     */
-    public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
+    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
-        Helper::isKeyLegal($key);
+        Helper::assertLegalKey($key);
 
         return $this->setItem($key, $value, $ttl);
     }
 
-     /**
-     * Determines whether an item exists in the cache.
-     * 
-     * @param string $key The cache item key.
-     * 
-     * @return bool True if item exists, false otherwise.
-     * @throws InvalidArgumentException
+    /**
+     * {@inheritdoc}
     */
     public function has(string $key): bool
     {
-        Helper::isKeyLegal($key);
+        Helper::assertLegalKey($key);
 
         return $this->engine->hasItem($key);
     }
 
     /**
-     * Deletes an item from the cache.
-     * 
-     * @param string $key The cache item key.
-     * 
-     * @return bool True if item was deleted, false otherwise.
-     * @throws InvalidArgumentException
+     * {@inheritdoc}
     */
     public function delete(string $key): bool
     {
-        Helper::isKeyLegal($key);
+        Helper::assertLegalKey($key);
 
         return $this->engine->deleteItem($key);
     }
 
     /**
-     * Clears the entire cache.
-     * 
-     * @return bool True on success, false on failure.
+     * {@inheritdoc}
     */
     public function clear(): bool
     {
@@ -110,19 +87,13 @@ class SimpleCache implements CacheInterface
     }
 
     /**
-     * Retrieves multiple cache items at once.
-     * 
-     * @param iterable<string> $keys The array keys of the items to retrieve.
-     * 
-     * @return iterable An array of items keyed by the cache keys.
-     * @throws InvalidArgumentException
+     * {@inheritdoc}
     */
     public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         $items = [];
         foreach ($keys as $key) {
-            Helper::isKeyLegal($key);
-
+            Helper::assertLegalKey($key);
             $items[$key] = $this->engine->getItem($key) ?? $default;
         }
 
@@ -130,21 +101,14 @@ class SimpleCache implements CacheInterface
     }
 
     /**
-     * Persists a set of key => value pairs in the cache, with an optional TTL.
-     * 
-     * @param iterable<string, mixed> $values The cache item to save key => value
-     * @param null|int|DateInterval $ttl Expiration
-     * 
-     * @return bool True if saved successfully, false otherwise.
+     * {@inheritdoc}
     */
     public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
     {
-
         $count = 0;
 
         foreach($values as $key => $value){
-            Helper::isKeyLegal($key);
-
+            Helper::assertLegalKey($key);
             if($this->setItem($key, $value, $ttl)){
                 $count++;
             }
@@ -154,16 +118,11 @@ class SimpleCache implements CacheInterface
     }
 
     /**
-     * Deletes multiple items from the cache.
-     * 
-     * @param iterable<string> $keys The cache item keys to delete. [key, key2, ..., key]
-     * 
-     * @return bool True if items were deleted, false otherwise.
-     * @throws InvalidArgumentException
+     * {@inheritdoc}
     */
     public function deleteMultiple(iterable $keys): bool
     {
-        Helper::areKeysLegal($keys);
+        Helper::assertLegalKeys($keys);
 
         return $this->engine->deleteItems($keys);
     }
@@ -173,23 +132,22 @@ class SimpleCache implements CacheInterface
      * 
      * @param string $key The cache item to save.
      * @param mixed $content content to save 
-     * @param null|int|DateInterval $expiration Expiration
+     * @param DateInterval|int|null $expiration Expiration
      * 
-     * @return bool True if item was saved, false otherwise.
+     * @return bool Return true if the item was saved, false otherwise.
     */
-    private function setItem(string $key, mixed $content, null|int|DateInterval $expiration = null): bool
+    private function setItem(string $key, mixed $content, DateInterval|int|null $expiration = null): bool
     {
-  
-        if($content === null || $content === '' || $content === []){
+        if(empty($content)){
             return false;
         }
         
         if($expiration === null){
             $expiration = 24 * 60 * 60;
-        }else if($expiration instanceof DateInterval){
-            $expiration = FileCache::ttlToSeconds($expiration);
+        }elseif($expiration instanceof DateInterval){
+            $expiration = Timestamp::ttlToSeconds($expiration);
         }
 
-        return $this->engine->setItem($key, $$content, $expiration, null, true);
+        return $this->engine->setItem($key, $content, $expiration, null, true);
     }
 }
