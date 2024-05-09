@@ -47,17 +47,11 @@ class CachePool implements CacheItemPoolInterface
     }
 
     /**
-     * Retrieves an item from the cache.
-     * 
-     * @param string $key The key for the item to retrieve.
-     * 
-     * @return CacheItem The cache item.
-     * 
-     * @throws InvalidArgumentException If the key is not a legal value.
+     * {@inheritdoc}
     */
     public function getItem(string $key): CacheItem
     {
-        Helper::isKeyLegal($key);
+        Helper::assertLegalKey($key);
 
         $data = $this->engine->getItem($key, false);
         $content = $data['data'] ?? null;
@@ -71,18 +65,13 @@ class CachePool implements CacheItemPoolInterface
     }
 
     /**
-     * Retrieves multiple cache items at once.
-     * 
-     * @param array $keys The array keys of the items to retrieve.
-     * 
-     * @return iterable An array of items keyed by the cache keys.
-     * @throws InvalidArgumentException
+     * {@inheritdoc}
     */
     public function getItems(array $keys = []): iterable
     {
         $items = [];
         foreach ($keys as $key) {
-            Helper::isKeyLegal($key);
+            Helper::assertLegalKey($key);
 
             $items[$key] = $this->getItem($key);
         }
@@ -91,24 +80,17 @@ class CachePool implements CacheItemPoolInterface
     }
 
     /**
-     * Determines whether an item exists in the cache.
-     * 
-     * @param string $key The cache item key.
-     * 
-     * @return bool True if item exists, false otherwise.
-     * @throws InvalidArgumentException
+     * {@inheritdoc}
     */
     public function hasItem(string $key): bool
     {
-        Helper::isKeyLegal($key);
+        Helper::assertLegalKey($key);
 
         return $this->engine->hasItem($key);
     }
 
     /**
-     * Clears the entire cache.
-     * 
-     * @return bool True on success, false on failure.
+     * {@inheritdoc}
     */
     public function clear(): bool
     {
@@ -116,41 +98,27 @@ class CachePool implements CacheItemPoolInterface
     }
 
     /**
-     * Deletes an item from the cache.
-     * 
-     * @param string $key The cache item key.
-     * 
-     * @return bool True if item was deleted, false otherwise.
-     * @throws InvalidArgumentException
+     * {@inheritdoc}
     */
     public function deleteItem(string $key): bool
     {
-        Helper::isKeyLegal($key);
+        Helper::assertLegalKey($key);
 
         return $this->engine->deleteItem($key);
     }
 
     /**
-     * Deletes multiple items from the cache.
-     * 
-     * @param array $keys The cache item keys to delete.
-     * 
-     * @return bool True if items were deleted, false otherwise.
-     * @throws InvalidArgumentException
+     * {@inheritdoc}
     */
     public function deleteItems(array $keys): bool
     {
-        Helper::areKeysLegal($keys);
+        Helper::assertLegalKeys($keys);
 
         return $this->engine->deleteItems($keys);
     }
 
     /**
-     * Persists a cache item immediately.
-     * 
-     * @param CacheItemInterface $item The cache item to save.
-     * 
-     * @return bool True if saved successfully, false otherwise.
+     * {@inheritdoc}
     */
     public function save(CacheItemInterface $item): bool
     {
@@ -165,11 +133,7 @@ class CachePool implements CacheItemPoolInterface
     }
 
     /**
-     * Save a deferred cache item.
-     * 
-     * @param CacheItemInterface $item The cache item to save.
-     * 
-     * @return bool False if the item could not be queued or if a commit was attempted and failed. True otherwise.
+     * {@inheritdoc}
     */
     public function saveDeferred(CacheItemInterface $item): bool
     {
@@ -190,9 +154,7 @@ class CachePool implements CacheItemPoolInterface
     }
 
     /**
-     * Commits any deferred cache items.
-     * 
-     * @return bool True if all not-yet-saved items were successfully saved or there were none. False otherwise.
+     * {@inheritdoc}
     */
     public function commit(): bool
     {
