@@ -55,9 +55,7 @@ class CacheItem implements CacheItemInterface
     }
 
     /**
-     * Retrieves the key of the cache item.
-     *
-     * @return string The cache item key.
+     * {@inheritdoc}
     */
     public function getKey(): string
     {
@@ -65,9 +63,7 @@ class CacheItem implements CacheItemInterface
     }
 
     /**
-     * Retrieves the value of the cache item.
-     *
-     * @return mixed|null The value of the cache item, or null if not found.
+     * {@inheritdoc}
     */
     public function get(): mixed
     {
@@ -75,9 +71,7 @@ class CacheItem implements CacheItemInterface
     }
 
     /**
-     * Checks if the cache item is a hit.
-     *
-     * @return bool True if the cache item is a hit, otherwise false.
+     * {@inheritdoc}
     */
     public function isHit(): bool
     {
@@ -85,10 +79,7 @@ class CacheItem implements CacheItemInterface
     }
 
     /**
-     * Sets the value of the cache item.
-     *
-     * @param mixed $value The value to set.
-     * @return static The current instance.
+     * {@inheritdoc}
     */
     public function set(mixed $value): static
     {
@@ -99,10 +90,7 @@ class CacheItem implements CacheItemInterface
     }
 
     /**
-     * Sets the expiration time of the cache item.
-     *
-     * @param DateTimeInterface|null $expiration The expiration time of the cache item.
-     * @return static The current instance.
+     * {@inheritdoc}
     */
     public function expiresAt(?DateTimeInterface $expiration): static
     {
@@ -113,10 +101,7 @@ class CacheItem implements CacheItemInterface
     }
 
     /**
-     * Sets the expiration time of the cache item relative to the current time.
-     *
-     * @param int|DateInterval|null $time The expiration time in seconds or as a DateInterval.
-     * @return static The current instance.
+     * {@inheritdoc}
     */
     public function expiresAfter(int|DateInterval|null $time): static
     {
