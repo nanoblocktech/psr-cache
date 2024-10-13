@@ -1,23 +1,37 @@
-# PSR CACHE
+# Luminova PSR Cache Interface
 
-PSR Cache for [Luminova Framework](https://github.com/luminovang/luminova/) `CachePool`, `SimpleCache`.
-To use this library you need to install Luminova Framework first.
+The PSR Cache implementation for the [Luminova Framework](https://luminova.ng), [Luminova Framework GitHub](https://github.com/luminovang/luminova/) providing `CachePool` and `SimpleCache` class. 
+This library enables the use of both file-based and memory-based (Memcached) caching systems with an easy-to-use API.
 
+For more information read the official [documentation](https://luminova.ng/docs/3.3.0/cache/psr).
 
-### Installation 
+---
 
-Via Composer 
+### Installation
 
-```bash 
+Via Composer:
+
+```bash
 composer require nanoblocktech/psr-cache
 ```
 
-### Usage 
+---
+
+## Cache Pool Class
+
+The `CachePool` class provides an interface to manage cache items. 
+It supports multiple cache storage driver, such as file-based or memory-based (Memcached) caching.
+
+---
+
+### Usage Example
+
 ```php
+<?php
 use \Luminova\Psr\Cache\CachePool;
 use \Luminova\Psr\Cache\CacheItem;
 
-$pool = new CachePool('my_cache', 'my_cache_folder_name');
+$pool = CachePool::withFileCache('my_cache', 'my_cache_folder');
 
 // Set a cache item
 $item = $pool->getItem('cache_key');
@@ -39,49 +53,76 @@ if (!$item->isHit()) {
 }
 ```
 
-### CachePool Methods 
+---
 
-Initialize the class  with `storage` location name and `folder` subfolder name.
-```php 
-$pool = new CachePool(string $storage = 'psr_cache_storage', string $folder = 'psr');
-```
+### CachePool Class Methods
+
+#### Constructor
 
 ```php
-// Retrieves an item from the cache.
+$pool = new CachePool(
+    string|null $storage = 'psr_cache_storage', 
+    string|null $subfolderOrId = 'psr', 
+    string|null $driver = CachePool::FILECACHE
+);
+```
+
+- **$storage**: Cache storage name to differentiate cache spaces (defaults to `'psr_cache_storage'`).
+- **$subfolderOrId**: Optional subfolder for file-based cache or Memcached persistent ID (defaults to `'psr'`).
+- **$driver**: Optional cache driver, either `CachePool::FILECACHE` (default) or `CachePool::MEMCACHED`.
+
+---
+
+#### Methods
+
+```php
+// Retrieve a cache item by key.
 $pool->getItem('cache_key'): CacheItem;
 
-// Retrieves multiple cache items at once.
-$pool->getItems(array ['key1', 'key2']): iterable<key, CacheItem>;
+// Retrieve multiple cache items.
+$pool->getItems(['key1', 'key2']): iterable<key,CacheItem>;
 
-// Determines whether an item exists in the cache.
-$pool->hasItem(string 'cache_key'): bool;
+// Check if a cache item exists.
+$pool->hasItem('cache_key'): bool;
 
-// Persists a cache item immediately.
+// Save a cache item.
 $pool->save(CacheItemInterface $item): bool;
 
 // Save a deferred cache item.
 $pool->saveDeferred(CacheItemInterface $item): bool;
 
-// Commits any deferred cache items.
+// Commit deferred cache items.
 $pool->commit(): bool;
 
-// Rollback If any deferred commit failed to save, if you prefer not to recommit
+// Rollback deferred cache items.
 $pool->rollback(): bool;
 
-// Deletes an item from the cache.
-$pool->deleteItem(string 'cache_key'): bool;
+// Delete a cache item by key.
+$pool->deleteItem('cache_key'): bool;
 
-// Deletes multiple items from the cache.
+// Delete multiple cache items.
 $pool->deleteItems(array ['key1', 'key2']): bool;
 
-// Clear all cached entries 
+// Clear all cached entries.
 $pool->clear(): bool;
 ```
 
+---
+
+## Simple Cache Class
+
+The `SimpleCache` class provides a simplified interface for interacting with the cache. 
+It offers basic operations for storing and retrieving cached data, it supports multiple cache storage driver, such as file-based or memory-based (Memcached) caching.
+
+---
+
+### Usage Example
+
 ```php
+<?php
 use \Luminova\Psr\Cache\SimpleCache;
 
-$simple = new SimpleCache(string 'my_cache', string 'my_cache_folder_name');
+$simple = SimpleCache::withFileCache('my_cache', 'my_cache_folder_name');
 
 // Set a cache item
 $data = $simple->get('cache_key', 'NO_DATA');
@@ -91,64 +132,87 @@ if($item === 'NO_DATA'){
 }
 ```
 
-### SimpleCache Methods 
+---
 
-Initialize the class  with `storage` location name and `folder` subfolder name.
+### SimpleCache Class Methods
+
+#### Constructor
 
 ```php
-$simple = new ‎SimpleCache‎(string $storage = 'psr_cache_storage', string $folder = 'psr');
+$simple = new SimpleCache(
+    string|null $storage = 'psr_cache_storage', 
+    string|null $subfolderOrId = 'psr', 
+    string|null $driver = SimpleCache::FILECACHE
+);
 ```
 
+---
+
+#### Methods
+
 ```php
-// Retrieves an item from the cache.
-$simple->get(string 'cache_key', mixed 'default value'): mixed;
+// Retrieve a cache item by key, with a default fallback value.
+$simple->get('cache_key', 'default_value'): mixed;
 
-// Retrieves multiple cache items at once.
-$simple->getMultiple(array ['key1', 'key2'], 'default on empty key value'): iterable<key, mixed>;
+// Retrieve multiple cache items.
+$simple->getMultiple(array ['key1', 'key2'], 'default_value'): iterable<key, mixed>;
 
-// Determines whether an item exists in the cache.
-$simple->has(string 'cache_key'): bool;
+// Check if a cache item exists.
+$simple->has('cache_key'): bool;
 
-// Persists a cache item immediately with an optional TTL.
-$simple->set(string 'cache_key', mixed 'data to save', null|int|DateInterval 60): bool;
+// Save a cache item with an optional TTL.
+$simple->set('cache_key', 'data_to_save', int|DateInterval|null $ttl = 60): bool;
 
-// Persists a set of key => value pairs in the cache, with an optional TTL.
-$simple->setMultiple(array ['key1' => 'data 1', 'key2' => 'data 2'], null|int|DateInterval 60): bool;
+// Save multiple cache items with an optional TTL.
+$simple->setMultiple(array ['key1' => 'data1', 'key2' => 'data2'], int|DateInterval|null $ttl = 60): bool;
 
-// Deletes an item from the cache.
-$simple->delete(string 'cache_key'): bool;
+// Delete a cache item.
+$simple->delete('cache_key'): bool;
 
-// Deletes multiple items from the cache.
+// Delete multiple cache items.
 $simple->deleteMultiple(array ['key1', 'key2']): bool;
 
-// Clears all cache entries.
+// Clear all cache entries.
 $simple->clear(): bool;
 ```
 
-### CacheItem Methods 
+---
 
-Initialize the class with `key`, `content` to save and specify the `hit` state optionally.
+## Cache Item Class
+
+The `CacheItem` class represents an individual cache entry.
+It includes methods to manipulate and manage the cached data when working with `CachePool` class.
+
+---
+
+### CacheItem Class Methods
+
+#### Constructor
 
 ```php
 $item = new CacheItem(string $key, mixed $content = null, ?bool $isHit = null);
 ```
 
+---
+
+#### Methods
+
 ```php
-//Retrieves the key of the cache item.
+// Retrieve the key of the cache item.
 $item->getKey(): string;
 
-//Retrieves the value of the cache item.
+// Retrieve the value of the cache item.
 $item->get(): mixed;
 
-//Check if the cache item is a hit.
+// Check if the cache item is a hit.
 $item->isHit(): bool;
 
-//Sets the value of the cache item.
+// Set the value of the cache item.
 $item->set(mixed $value): static;
 
-//Sets the expiration time of the cache item.
+// Set the expiration time of the cache item.
 $item->expiresAt(?DateTimeInterface $expiration): static;
 
-//Sets the expiration time of the cache item relative to the current time.
+// Set the expiration time relative to the current time.
 $item->expiresAfter(int|DateInterval|null $time): static;
 ```
