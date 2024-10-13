@@ -61,7 +61,7 @@ class Helper
         }
 
         if (strlen($key) <= 2) {
-            throw new InvalidArgumentException('Cache key is not long enough');
+            throw new InvalidArgumentException('Cache key is not long enough.');
         }
     }
 }
