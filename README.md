@@ -3,7 +3,7 @@
 The PSR Cache implementation for the [Luminova Framework](https://luminova.ng), [Luminova Framework GitHub](https://github.com/luminovang/luminova/) providing `CachePool` and `SimpleCache` class. 
 This library enables the use of both file-based and memory-based (Memcached) caching systems with an easy-to-use API.
 
-For more information read the official [documentation](https://luminova.ng/docs/3.3.0/cache/psr).
+For more information read the official documentation [PSR Cache Pool](https://luminova.ng/docs/0.0.0/cache/psr-cache-pool) and [PSR Simple Cache](https://luminova.ng/docs/0.0.0/cache/psr-simple-cache).
 
 ---
 
