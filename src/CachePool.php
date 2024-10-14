@@ -38,7 +38,7 @@ class CachePool implements CacheItemPoolInterface
      * 
      * @var BaseCache|null $engine
      */
-    public ?BaseCache $engine = null;
+    protected ?BaseCache $engine = null;
 
     /**
      * Cache instance.
@@ -67,8 +67,8 @@ class CachePool implements CacheItemPoolInterface
      *
      * @param string|null $storage The cache storage name used to distinguish different cache pools or spaces.
      * @param string|null $subfolderOrId Optional subfolder for file-based cache or persistent ID for Memcached.
-     * @param string|null $driver Optional cache driver. Defaults to `SimpleCache::FILECACHE` if not provided.
-     *                            Accepts `SimpleCache::FILECACHE` or `SimpleCache::MEMCACHED`.
+     * @param string|null $driver Optional cache driver. Defaults to `CachePool::FILECACHE` if not provided.
+     *                            Accepts `CachePool::FILECACHE` or `CachePool::MEMCACHED`.
      */
     public function __construct(
         private string|null $storage = 'psr_cache_storage', 
@@ -118,7 +118,7 @@ class CachePool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function getItem(string $key): CacheItem
+    public function getItem(string $key): CacheItemInterface
     {
         Helper::assertLegalKey($key);
 
@@ -185,12 +185,12 @@ class CachePool implements CacheItemPoolInterface
      */
     public function save(CacheItemInterface $item): bool
     {
-        if(!$item instanceof CacheItem){
+        if(!$item instanceof CacheItemInterface){
             return false;
         }
 
         $key = $item->getKey();
-        $expired = $item->get() === null || $this->engine->hasExpired($key);
+        $expired = ($item->get() === null || $this->engine->hasExpired($key));
 
         return $this->saveItem($item, $expired);
     }
@@ -200,7 +200,7 @@ class CachePool implements CacheItemPoolInterface
      */
     public function saveDeferred(CacheItemInterface $item): bool
     {
-        if(!$item instanceof CacheItem){
+        if(!$item instanceof CacheItemInterface){
             return false;
         }
 
@@ -266,17 +266,22 @@ class CachePool implements CacheItemPoolInterface
     /**
      * Save an item to the cache.
      * 
-     * @param CacheItemInterface $item The cache item to save.
+     * @param CacheItemInterface|CacheItem $item The cache item to save.
      * @param bool $expired Whether the item is expired.
      * 
      * @return bool Return true if item was saved, false otherwise.
      */
-    private function saveItem(CacheItemInterface $item, bool $expired = true): bool
+    private function saveItem(CacheItemInterface|CacheItem $item, bool $expired = true): bool
     {
         if ($expired){
             $value = $item->get();
             return ($value !== null) 
-                ? $this->engine->setItem($item->getKey(), $value, $item->expiration, $item->expireAfter, true)
+                ? $this->engine->setItem(
+                    $item->getKey(), 
+                    $value, 
+                    $item->getExpiresAt(), 
+                    $item->getExpiresAfter()
+                )
                 : false;
         }
         
