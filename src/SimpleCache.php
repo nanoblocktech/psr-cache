@@ -38,7 +38,7 @@ class SimpleCache implements CacheInterface
      * 
      * @var BaseCache|null $engine
      */
-    public ?BaseCache $engine = null;
+    protected ?BaseCache $engine = null;
 
     /**
      * Cache instance.
@@ -187,7 +187,7 @@ class SimpleCache implements CacheInterface
      * 
      * @param string $key The cache item to save.
      * @param mixed $content content to save 
-     * @param DateInterval|int|null $expiration Expiration
+     * @param DateInterval|int|null $expiration Expiration (default: 24 hours).
      * 
      * @return bool Return true if the item was saved, false otherwise.
      */
