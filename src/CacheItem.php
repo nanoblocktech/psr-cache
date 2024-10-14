@@ -41,27 +41,51 @@ class CacheItem implements CacheItemInterface
      * 
      * @var ?DateTimeInterface $expiration
      */
-    public ?DateTimeInterface $expiration = null;
+    private ?DateTimeInterface $expiration = null;
 
     /**
      * Cache expiration after.
      * 
      * @var DateInterval|int|null $expireAfter
      */
-    public DateInterval|int|null $expireAfter = null;
+    private DateInterval|int|null $expireAfter = null;
 
     /**
-     * Constructor.
+     * CacheItem Constructor.
      *
-     * @param string $key The cache item key.
-     * @param mixed $value The cache item value.
-     * @param bool $isHit Indicates if the cache item was a hit.
+     * @param string $key The unique identifier for the cache item.
+     * @param mixed $content The value to be stored in the cache item (default: null).
+     * @param bool|null $isHit Determines whether the cache item is considered a "hit" (i.e., the item exists in the cache). 
+     *                      If null, the hit status is automatically determined based on whether the content is null or not.
      */
     public function __construct(string $key, mixed $content = null, ?bool $isHit = null)
     {
         $this->key = $key;
         $this->content = $content;
         $this->isHit = ($isHit === null) ? $content !== null : $isHit;
+    }
+
+    /**
+     * Gets the absolute expiration time for this cache item.
+     * 
+     * @return DateTimeInterface|null Returns the exact expiration time as a DateTimeInterface object, or null if the item has no expiration set.
+     */
+    public function getExpiresAt(): ?DateTimeInterface
+    {
+        return $this->expiration;
+    }
+
+    /**
+     * Gets the relative expiration time for this cache item.
+     * 
+     * @return DateInterval|int|null Returns the expiration time relative to the current time. It may return:
+     * - a `DateInterval` object for specific intervals,
+     * - an integer representing seconds,
+     * - or null if no expiration is set.
+     */
+    public function getExpiresAfter(): DateInterval|int|null
+    {
+        return $this->expireAfter;
     }
 
     /**
@@ -113,7 +137,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
-    public function expiresAfter(int|DateInterval|null $time): static
+    public function expiresAfter(DateInterval|int|null $time): static
     {
         $this->expireAfter = $time;
 
