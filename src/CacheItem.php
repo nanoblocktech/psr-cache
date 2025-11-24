@@ -9,9 +9,9 @@
  */
 namespace Luminova\Psr\Cache;
 
-use \Psr\Cache\CacheItemInterface;
-use \DateTimeInterface;
 use \DateInterval;
+use \DateTimeInterface;
+use \Psr\Cache\CacheItemInterface;
 
 class CacheItem implements CacheItemInterface
 {
@@ -56,7 +56,7 @@ class CacheItem implements CacheItemInterface
      * @param string $key The unique identifier for the cache item.
      * @param mixed $content The value to be stored in the cache item (default: null).
      * @param bool|null $isHit Determines whether the cache item is considered a "hit" (i.e., the item exists in the cache). 
-     *                      If null, the hit status is automatically determined based on whether the content is null or not.
+     *              If null, the hit status is automatically determined based on whether the content is null or not.
      */
     public function __construct(string $key, mixed $content = null, ?bool $isHit = null)
     {
@@ -68,7 +68,8 @@ class CacheItem implements CacheItemInterface
     /**
      * Gets the absolute expiration time for this cache item.
      * 
-     * @return DateTimeInterface|null Returns the exact expiration time as a DateTimeInterface object, or null if the item has no expiration set.
+     * @return DateTimeInterface|null Returns the exact expiration time as a DateTimeInterface object, 
+     *  `                   or null if the item has no expiration set.
      */
     public function getExpiresAt(): ?DateTimeInterface
     {
