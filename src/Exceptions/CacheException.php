@@ -11,11 +11,16 @@ namespace Luminova\Psr\Cache\Exceptions;
 
 use \Psr\Cache\CacheException as CacheExceptionInterface;
 use \Luminova\Exceptions\AppException;
+use \Luminova\Exceptions\ErrorCode;
 use \Throwable;
 
 class CacheException extends AppException implements CacheExceptionInterface
 {
-    public function __construct(string $message = '', int $code = AppException::CACHE_ERROR, Throwable $previous = null)
+    public function __construct(
+        string $message = '', 
+        int $code = ErrorCode::CACHE_ERROR, 
+        ?Throwable $previous = null
+    )
     {
         parent::__construct($message, $code, $previous);
     }
