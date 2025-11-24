@@ -9,12 +9,12 @@
  */
 namespace Luminova\Psr\Cache;
 
-use \Psr\SimpleCache\CacheInterface;
-use \Luminova\Base\BaseCache;
+use \DateInterval;
+use \Luminova\Base\Cache;
+use \Luminova\Time\Timestamp;
 use \Luminova\Cache\FileCache;
 use \Luminova\Cache\MemoryCache;
-use \Luminova\Time\Timestamp;
-use \DateInterval;
+use \Psr\SimpleCache\CacheInterface;
 use \Luminova\Psr\Cache\Helper\Helper;
 
 class SimpleCache implements CacheInterface
@@ -36,9 +36,9 @@ class SimpleCache implements CacheInterface
     /**
      * Engin instance.
      * 
-     * @var BaseCache|null $engine
+     * @var Cache|null $engine
      */
-    protected ?BaseCache $engine = null;
+    protected ?Cache $engine = null;
 
     /**
      * Cache instance.
@@ -57,9 +57,9 @@ class SimpleCache implements CacheInterface
      *                            Accepts `SimpleCache::FILECACHE` or `SimpleCache::MEMCACHED`.
      */
     public function __construct(
-        private string|null $storage = 'psr_cache_storage', 
-        private string|null $subfolderOrId = 'psr',
-        private string|null $driver = self::FILECACHE
+        private ?string $storage = 'psr_cache_storage', 
+        private ?string $subfolderOrId = 'psr',
+        private ?string $driver = self::FILECACHE
     ) {
         $this->driver ??= env('preferred.cache.driver', 'filesystem');
         $this->engine = ($this->driver === self::MEMCACHED) 
@@ -88,14 +88,14 @@ class SimpleCache implements CacheInterface
      * Creates or returns a singleton instance of the class using Memcached.
      *
      * @param string|null $storage Optional storage name to be used in the Memcached engine.
-     * @param string|null $persistent_id Optional persistent ID for Memcached sessions.
+     * @param string|null $persistentId Optional persistent ID for Memcached sessions.
      * 
      * @return static Returns a singleton instance of the class with a memory-based cache engine.
      */
-    public static function withMemCache(?string $storage = null, ?string $persistent_id = null): static 
+    public static function withMemCache(?string $storage = null, ?string $persistentId = null): static 
     {
         if (!self::$instance instanceof self) {
-            self::$instance = new static($storage, $persistent_id, self::MEMCACHED);
+            self::$instance = new static($storage, $persistentId, self::MEMCACHED);
         }
 
         return self::$instance;
